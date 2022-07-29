@@ -6,7 +6,7 @@ local position
 local rotation = 3
 local startpos
 -- Mine depth + random 0,5 
-local mineDepth = 10
+local mineDepth = 40
 
 local mainPcId = 8
 
