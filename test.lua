@@ -312,9 +312,9 @@ end
 -- Random gen has to warm up 
 math.randomseed(os.time())
 math.random(); math.random(); math.random()
-rotation = translateMcDir(getOrientation()) 
 position = vector.new(gps.locate(2, false))
 startpos = position
+rotation = translateMcDir(getOrientation()) 
 rednet.open("left")
 -- Run main loop
 parallel.waitForAny(main, listen)
