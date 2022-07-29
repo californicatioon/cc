@@ -258,7 +258,6 @@ local mainMode = 0
 
 -- Main loop
 function main()
-    startpos = position   
     turtle.refuel()
     while true do
         position = vector.new(gps.locate(2, false))
@@ -315,6 +314,7 @@ math.randomseed(os.time())
 math.random(); math.random(); math.random()
 rotation = translateMcDir(getOrientation()) 
 position = vector.new(gps.locate(2, false))
+startpos = position
 rednet.open("left")
 -- Run main loop
 parallel.waitForAny(main, listen)
