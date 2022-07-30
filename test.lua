@@ -335,8 +335,9 @@ function mainLoop()
             break
         end
         main()
-        os.sleep(1)
-    end
+        os.queueEvent("fakeEvent");
+        os.pullEvent();
+        end
 end
 
 function listen()
@@ -348,7 +349,8 @@ function listen()
         elseif message == "ping" then
             log("Pong at: " .. tostring(position))
         end
-        os.sleep(1)
+        os.queueEvent("fakeEvent2");
+        os.pullEvent();
     end
 end
 
