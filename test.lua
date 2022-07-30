@@ -285,7 +285,9 @@ function main()
             local minVec = position - startpos
             local fuelNeeded = math.abs(minVec.x) + math.abs(minVec.y) + math.abs(minVec.z)
             -- we run out of gas so run home
-            if fuel == fuelNeeded then
+            print(fuel)
+            print(fuelNeeded)
+            if fuel <= fuelNeeded then
                 moveTo(startpos)
             end
             randomMine()
