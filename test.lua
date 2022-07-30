@@ -10,7 +10,23 @@ local mineDepth = 40
 
 local mainPcId = 8
 
+local chest = peripheral.find("minecraft:chest")
+
 local baseHolePos = vector.new(-56, mineDepth, -53)
+
+
+-- checks for item cotaining name
+function checkInv(name)
+    for i = 1,16 do
+        local item = chest.getItemDetail(i)
+        if item then
+            if not string.find(item.name, name) then
+                turtle.select(i)
+                turtle.drop()
+            end
+        end
+    end
+end
 
 function log(msg)
     rednet.send(mainPcId, msg)
@@ -263,21 +279,27 @@ function main()
     while true do
         position = vector.new(gps.locate(2, false))
         local continue = false
+        -- Stop turtle
         if mainMode == 2 then
             log("Stopped!")
             break
         end
+        -- Check inventory items
+        checkInv("gold")
+        -- Check if empty fuel
         local fuel = turtle.getFuelLevel()
         if fuel == 0 then
             log("Fuel empty at: " .. tostring(position))
             continue = true
         end
+        -- Check if we running on low gas
         local minVec = position - startpos
         local fuelNeeded = math.abs(minVec.x) + math.abs(minVec.y) + math.abs(minVec.z)
         -- we run out of gas so run home
         if fuel <= fuelNeeded then
             moveTo(startpos)
         end
+        -- Check if we should go home
         if mainMode == 1 then
            moveTo(startpos) 
            if startpos.x == position.x and startpos.y == position.y and startpos.z == position.z then
@@ -286,6 +308,7 @@ function main()
            end
            continue = true
         end
+        -- Random mining process
         if continue == false then
             randomMine()
         end
