@@ -286,46 +286,55 @@ end
 -- 2 stopped
 local mainMode = 0
 
--- Main loop
 function main()
-    turtle.refuel()
+    position = vector.new(gps.locate(2, false))
+    -- Check inventory items
+    checkInv()
+    -- Check if empty fuel
+    local fuel = turtle.getFuelLevel()
+    if fuel == 0 then
+        log("Fuel empty at: " .. tostring(position))
+        return
+    end
+    -- Check if inventory full
+    local lastItem = turtle.getItemDetail(16)
+    if lastItem then
+        log("Fuel low, will go home")
+        moveTo(startpos)
+        return
+    end
+
+    -- Check if we running on low gas
+    local minVec = position - startpos
+    local fuelNeeded = minVec.x + minVec.y + minVec.z
+    -- we run out of gas so run home
+    if fuel <= fuelNeeded then
+        log("Fuel low, will go home")
+        moveTo(startpos)
+        return
+    end
+    -- Check if we should go home
+    if mainMode == 1 then
+        moveTo(startpos) 
+        if startpos.x == position.x and startpos.y == position.y and startpos.z == position.z then
+            log("Arrived at home")
+            mainMode = 2
+        end
+        return
+    end
+    -- Random mining process
+    randomMine()
+end
+
+-- Main loop
+function mainLoop()
     while true do
-        position = vector.new(gps.locate(2, false))
-        local continue = false
         -- Stop turtle
         if mainMode == 2 then
             log("Stopped!")
             break
         end
-        -- Check inventory items
-        checkInv("gold")
-        -- Check if empty fuel
-        local fuel = turtle.getFuelLevel()
-        if fuel == 0 then
-            log("Fuel empty at: " .. tostring(position))
-            continue = true
-        end
-        -- Check if we running on low gas
-        local minVec = position - startpos
-        local fuelNeeded = math.abs(minVec.x) + math.abs(minVec.y) + math.abs(minVec.z)
-        -- we run out of gas so run home
-        if fuel <= fuelNeeded then
-            moveTo(startpos)
-        end
-        -- Check if we should go home
-        if mainMode == 1 then
-           moveTo(startpos) 
-           if startpos.x == position.x and startpos.y == position.y and startpos.z == position.z then
-                log("Arrived at home")
-                mainMode = 2
-           end
-           continue = true
-        end
-        -- Random mining process
-        if continue == false then
-            randomMine()
-        end
-        continue = false
+        main()
         os.sleep(1)
     end
 end
@@ -351,6 +360,6 @@ startpos = position
 math.randomseed(os.time())
 math.random(); math.random(); math.random()
 rotation = translateMcDir(getOrientation()) 
-rednet.open("left")
+rednet.open("right")
 -- Run main loop
-parallel.waitForAny(main, listen)
+parallel.waitForAny(mainLoop, listen)
