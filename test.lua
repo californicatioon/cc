@@ -10,15 +10,13 @@ local mineDepth = 40
 
 local mainPcId = 8
 
-local chest = peripheral.find("minecraft:chest")
-
 local baseHolePos = vector.new(-56, mineDepth, -53)
 
 
 -- checks for item cotaining name
 function checkInv(name)
     for i = 1,16 do
-        local item = chest.getItemDetail(i)
+        local item = turtle.getItemDetail(i)
         if item then
             if not string.find(item.name, name) then
                 turtle.select(i)
