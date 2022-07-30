@@ -315,6 +315,6 @@ startpos = position
 math.randomseed(os.time())
 math.random(); math.random(); math.random()
 rotation = translateMcDir(getOrientation()) 
-rednet.open("left")
+rednet.open("right")
 -- Run main loop
 parallel.waitForAny(main, listen)
