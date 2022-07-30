@@ -31,7 +31,7 @@ function checkInv()
                 end
             end
             -- refuel turtle if coal in inv
-            if string.find(item.name, "coal") then
+            if string.find(item.name, "coal") or string.find(item.name, "lava") then
                 turtle.refuel()
             end
             if turtle.getItemSpace(i) == 0 and iSlot == i then
