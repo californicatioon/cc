@@ -12,15 +12,24 @@ local mainPcId = 8
 
 local baseHolePos = vector.new(-56, mineDepth, -53)
 
+local blockItemList = {"stone","dirt", "gravel", "marble", "basalt"}
 
--- checks for item cotaining name
-function checkInv(name)
+-- check items and throws away items which aren't in blockList
+-- also consumes coal
+function checkInv()
     for i = 1,16 do
         local item = turtle.getItemDetail(i)
         if item then
-            if not string.find(item.name, name) then
-                turtle.select(i)
-                turtle.drop()
+            -- drop items from blocklsit
+            for x = 1, #blockItemList do 
+                if string.find(item.name, blockItemList[x]) then
+                    turtle.select(i)
+                    turtle.drop()
+                end
+            end
+            -- refuel turtle if coal in inv
+            if string.find(item.name, "coal") then
+                turtle.refuel()
             end
         end
     end
@@ -179,8 +188,10 @@ function checkOres(dir)
         for i = 0,3,1 do
             local success, data = turtle.inspect()
             if success then
-                if string.find(data.name, "gold") then
-                    return 1
+                for x = 1, #blockItemList do 
+                    if not string.find(item.name, blockItemList[x]) then
+                        return 1
+                    end
                 end
             end
             turn(0)
@@ -188,19 +199,23 @@ function checkOres(dir)
     elseif dir == 2 and dir == 4 then
         local success, data = turtle.inspectUp()
         if success then
-            if string.find(data.name, "gold") then
-                return 2
+            for x = 1, #blockItemList do 
+                if not string.find(item.name, blockItemList[x]) then
+                    return 2
+                end
             end
         end
     elseif dir == 3 and dir == 4 then
         local success, data = turtle.inspectDown()
         if success then
-            if string.find(data.name, "gold") then
-                return 3
+            for x = 1, #blockItemList do 
+                if not string.find(item.name, blockItemList[x]) then
+                    return 3
+                end
             end
         end
     end
-    return false
+    return 0
 end
 
 function collectOres()
