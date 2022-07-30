@@ -218,7 +218,7 @@ function randomMine()
        moveTo(baseHolePos)
         if position.x == baseHolePos.x and position.y == baseHolePos.y and position.z == baseHolePos.z then
             mineStage = 0
-            log("Moving to hole pos")
+            log("Moved to base hole pos: " .. tostring(position))
         end
     end
     -- init mine pos 
@@ -262,11 +262,22 @@ function main()
     turtle.refuel()
     while true do
         position = vector.new(gps.locate(2, false))
+        local continue = false
         if mainMode == 2 then
             log("Stopped!")
             break
         end
-        local continue = false
+        local fuel = turtle.getFuelLevel()
+        if fuel == 0 then
+            log("Fuel empty at: " .. tostring(position))
+            continue = true
+        end
+        local minVec = position - startpos
+        local fuelNeeded = math.abs(minVec.x) + math.abs(minVec.y) + math.abs(minVec.z)
+        -- we run out of gas so run home
+        if fuel <= fuelNeeded then
+            moveTo(startpos)
+        end
         if mainMode == 1 then
            moveTo(startpos) 
            if startpos.x == position.x and startpos.y == position.y and startpos.z == position.z then
@@ -274,22 +285,8 @@ function main()
                 mainMode = 2
            end
            continue = true
-           
         end
         if continue == false then
-            local fuel = turtle.getFuelLevel()
-            if fuel == 0 then
-                log("Fuel empty!")
-                return 
-            end
-            local minVec = position - startpos
-            local fuelNeeded = math.abs(minVec.x) + math.abs(minVec.y) + math.abs(minVec.z)
-            -- we run out of gas so run home
-            print(fuel)
-            print(fuelNeeded)
-            if fuel <= fuelNeeded then
-                moveTo(startpos)
-            end
             randomMine()
         end
         continue = false
