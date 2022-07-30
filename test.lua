@@ -246,6 +246,7 @@ function randomMine()
         if position.x == randomPos.x and position.y == randomPos.y and position.z == randomPos.z then
             randomPos = nil
             log("Stage: Reset random pos")
+            return
         end
         moveTo(randomPos)
     end
