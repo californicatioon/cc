@@ -186,7 +186,7 @@ end
 function checkOres(dir) 
     if dir == 1 or dir == 4 then
         for i = 0,3,1 do
-            local success, data = turtle.inspect()
+            local success, item = turtle.inspect()
             if success then
                 for x = 1, #blockItemList do 
                     if not string.find(item.name, blockItemList[x]) then
@@ -197,7 +197,7 @@ function checkOres(dir)
             turn(0)
         end
     elseif dir == 2 and dir == 4 then
-        local success, data = turtle.inspectUp()
+        local success, item = turtle.inspectUp()
         if success then
             for x = 1, #blockItemList do 
                 if not string.find(item.name, blockItemList[x]) then
@@ -206,7 +206,7 @@ function checkOres(dir)
             end
         end
     elseif dir == 3 and dir == 4 then
-        local success, data = turtle.inspectDown()
+        local success, item = turtle.inspectDown()
         if success then
             for x = 1, #blockItemList do 
                 if not string.find(item.name, blockItemList[x]) then
