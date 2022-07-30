@@ -14,9 +14,12 @@ local baseHolePos = vector.new(-56, mineDepth, -53)
 
 local blockItemList = {"stone","dirt", "gravel", "marble", "basalt"}
 
+local slotMap = {}
+
 -- check items and throws away items which aren't in blockList
 -- also consumes coal
 function checkInv()
+    local iSlot = 1
     for i = 1,16 do
         local item = turtle.getItemDetail(i)
         if item then
@@ -31,8 +34,12 @@ function checkInv()
             if string.find(item.name, "coal") then
                 turtle.refuel()
             end
+            if turtle.getItemSpace(i) == 0 and iSlot == i then
+                iSlot = iSlot + 1
+            end
         end
     end
+    turtle.select(iSlot)
 end
 
 function log(msg)
