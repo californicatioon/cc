@@ -8,11 +8,16 @@ local startpos
 -- Mine depth + random 0,5 
 local mineDepth = 15
 
-local mainPcId = 8
+local mainPcId = 13
 
-local baseHolePos = vector.new(-56, mineDepth, -53)
+local chunkRange = 50
+
+local baseHolePos = vector.new(240, mineDepth, -222)
+
+local chestPos = vector.new(240, 67, -215)
 
 local blockItemList = {"stone","dirt", "gravel", "marble", "basalt"}
+local blockAttackList = {"chest","turtle"}
 
 local slotMap = {}
 
@@ -32,14 +37,19 @@ function checkInv()
             end
             -- refuel turtle if coal in inv
             if string.find(item.name, "coal") or string.find(item.name, "lava") then
+                turtle.select(i)
                 turtle.refuel()
             end
             if turtle.getItemSpace(i) == 0 and iSlot == i then
                 iSlot = iSlot + 1
             end
+            if i == 16 then
+                return true
+            end
         end
     end
     turtle.select(iSlot)
+    return false
 end
 
 function log(msg)
@@ -69,12 +79,21 @@ function move(dir)
     -- check for monster
     local r = false
     if dir == 0 then
-        local l = turtle.inspect()
+        local l, item = turtle.inspect()
         local moveF = turtle.forward()
         if moveF == false and not l then
             -- atack them
             turtle.attack()
         elseif moveF == false then
+            for x = 1, #blockAttackList do 
+                if string.find(item.name, blockAttackList[x]) then
+                    if blockAttackList[x] == "turtle" then
+                        local dodgeVec = vector.new(position.x, position.y + 1, position.z)
+                        moveTo(dodgeVec)
+                    end
+                    return
+                end
+            end
             turtle.dig()
         else
             if rotation == 1 then
@@ -90,20 +109,38 @@ function move(dir)
         end
     elseif dir == 2 then
         local moveU = turtle.up()
-        local l = turtle.inspectUp()
+        local l, item = turtle.inspectUp()
         if moveU == false and not l then
             turtle.attackUp()
         elseif moveU == false then
+            for x = 1, #blockAttackList do 
+                if string.find(item.name, blockAttackList[x]) then
+                    if blockAttackList[x] == "turtle" then
+                        local dodgeVec = vector.new(position.x + 1, position.y, position.z + 1)
+                        moveTo(dodgeVec)
+                    end
+                    return
+                end
+            end
             turtle.digUp()
         else
             position.y = position.y + 1
         end
     elseif dir == 3 then
         local moveD = turtle.down()
-        local l = turtle.inspectDown()
+        local l, item = turtle.inspectDown()
         if moveD == false and not l then
             turtle.attackDown()
         elseif moveD == false then
+            for x = 1, #blockAttackList do 
+                if string.find(item.name, blockAttackList[x]) then
+                    if blockAttackList[x] == "turtle" then
+                        local dodgeVec = vector.new(position.x + 1, position.y, position.z + 1)
+                        moveTo(dodgeVec)
+                    end
+                    return
+                end
+            end
             turtle.digDown()
         else
             position.y = position.y - 1
@@ -131,6 +168,10 @@ end
 
 function moveTo(vector3)
     local minVec = vector3
+    if minVec.y < position.y then
+        move(3)
+        return
+    end
     if minVec.z > position.z then
         while rotation ~= 3 do
             turn(0)
@@ -163,10 +204,6 @@ function moveTo(vector3)
         move(2)
         return
     end
-    if minVec.y < position.y then
-        move(3)
-        return
-    end
 end
 
 -- We use different direction enums than MC
@@ -191,19 +228,7 @@ end
 -- 2 up
 -- 3 down
 function checkOres(dir) 
-    if dir == 1 or dir == 4 then
-        for i = 0,3,1 do
-            local success, item = turtle.inspect()
-            if success then
-                for x = 1, #blockItemList do 
-                    if not string.find(item.name, blockItemList[x]) then
-                        return 1
-                    end
-                end
-            end
-            turn(0)
-        end
-    elseif dir == 2 and dir == 4 then
+    if dir == 2 and dir == 4 then
         local success, item = turtle.inspectUp()
         if success then
             for x = 1, #blockItemList do 
@@ -227,9 +252,7 @@ end
 
 function collectOres()
     local ores = checkOres(4)
-    if ores == 1 then
-        turtle.dig()
-    elseif ores == 2 then
+    if ores == 2 then
         turtle.digUp()
     elseif ores == 3 then
         turtle.digDown()
@@ -260,7 +283,7 @@ function randomMine()
     -- init mine pos 
     if mineStage == 0 then
         depth = mineDepth + math.random(-5, 5)
-        minePos = vector.new(position.x + math.random(-50, 50), depth, position.z + math.random(-50, 50))
+        minePos = vector.new(baseHolePos.x + math.random(-chunkRange, chunkRange), depth, baseHolePos.z + math.random(-chunkRange, chunkRange))
         mineStage = 1
         log("Created mining pos: " .. tostring(minePos))
     end
@@ -276,7 +299,7 @@ function randomMine()
     if mineStage == 2 then
         collectOres()
         if randomPos == nil then
-            randomPos = vector.new(position.x + math.random(-10,10), depth, position.z + math.random(-10,10))
+            randomPos = vector.new(baseHolePos.x + math.random(-chunkRange,chunkRange), depth, baseHolePos.z + math.random(-chunkRange,chunkRange))
             log("Stage: Create random pos: " .. tostring(randomPos))
         end
         if position.x == randomPos.x and position.y == randomPos.y and position.z == randomPos.z then
@@ -293,10 +316,32 @@ end
 -- 2 stopped
 local mainMode = 0
 
+local tempPos
+
+function dropAll()
+    while rotation ~= 1 do
+        turn(0)
+    end
+    for i = 1,16 do
+       turtle.select(i)
+       turtle.drop() 
+    end
+end
+
 function main()
     position = vector.new(gps.locate(2, false))
-    -- Check inventory items
-    checkInv()
+    -- Check inventory items and drop them
+    if checkInv() then
+        -- inv is full
+        log("Inventory is full! Coming back!")
+        moveTo(chestPos)
+        if chestPos.x == position.x and chestPos.y == position.y and chestPos.z == position.z then
+            -- drop all
+            dropAll()
+            log("Cleared inv")
+        end
+        return
+    end
     -- Check if empty fuel
     local fuel = turtle.getFuelLevel()
     if fuel == 0 then
@@ -329,22 +374,37 @@ function main()
         end
         return
     end
+
+    if mainMode == 3 then
+        moveTo(tempPos)
+        if tempPos.x == position.x and tempPos.y == position.y and tempPos.z == position.z then
+            log("Arrived you")
+            mainMode = 2
+        end
+        return
+    end
     -- Random mining process
-    randomMine()
+    if mainMode ~= 2 then
+        randomMine()
+    end
 end
 
 -- Main loop
 function mainLoop()
     while true do
         -- Stop turtle
-        if mainMode == 2 then
-            log("Stopped!")
-            break
-        end
         main()
         os.queueEvent("fakeEvent");
         os.pullEvent();
         end
+end
+
+function Split(s, delimiter)
+    result = {};
+    for match in (s..delimiter):gmatch("(.-)"..delimiter) do
+        table.insert(result, match);
+    end
+    return result;
 end
 
 function listen()
@@ -355,6 +415,20 @@ function listen()
             log("Going home now: " .. tostring(startpos))
         elseif message == "ping" then
             log("Pong at: " .. tostring(position))
+        elseif string.find(message, "here") then
+            local split = Split(message, ":")
+            local posStr = split[2]
+            local split2 = Split(posStr, ",")
+            local x = math.floor(tonumber(split2[1]))
+            local y = math.floor(tonumber(split2[2]))
+            local z = math.floor(tonumber(split2[3]))
+            local pos = vector.new(x, y, z)
+            log("Coming to you: " .. tostring(pos))
+            mainMode = 3
+            tempPos = pos
+        elseif message == "work" then
+            log("Going back to work!")
+            mainMode = 2
         end
         os.queueEvent("fakeEvent2");
         os.pullEvent();
