@@ -1,10 +1,10 @@
 # Auto mining script for cc tweaked
-# tested on version 1.12.2
+## tested on version 1.12.2
 
 I coded this in ~5 days and never used lua before. It has a bit of dead code, which can be used to make it work without gps system.
 I don't care about the coding style since I'm hoping to not use lua ever again. The code is commented tho.
 
-# features
+## features
 
 - remotely controllabe
 - will work with other turtles (moving out of their way etc.)
@@ -17,7 +17,7 @@ I don't care about the coding style since I'm hoping to not use lua ever again. 
 - auto kills creeps in your way
 - won't destroy your house ( will only change x and z coordinate at desired depth)
 
-# remote commands
+## remote commands
 Turtles will always log their current state + position + pc id
 
 - "Work" will tell it to work if it's currently waiting
@@ -26,7 +26,7 @@ Turtles will always log their current state + position + pc id
 - "Home" will let them go back to start position
 - "Ping" responds with pong + current position
 
-# setup
+## setup
 
 - setup a gps system with ender pads
 - craft an ender mining turtle
@@ -34,7 +34,7 @@ Turtles will always log their current state + position + pc id
 - download and name turtle.lua as "startup" on the turtle
 - downlaod and name mainpc.lua as "startup" on your "main" computer or pocket computer
 
-# settings
+## settings
 in turtle.lua set:
 - minedepth to the depth it should mine at
 - mainpcid to the id of your main computer or pocket computer
